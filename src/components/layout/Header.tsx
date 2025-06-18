@@ -5,17 +5,27 @@ import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '@/store/authSlice';
+import type { RootState } from '@/store';
 
 export default function Header() {
   const router = useRouter();
   const [search, setSearch] = useState('');
+  const dispatch = useDispatch();
+  const auth = useSelector((state: RootState) => state.auth);
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
       router.push(`/products?search=${encodeURIComponent(search)}`);
       setSearch('');
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push('/login');
   };
 
   return (
@@ -38,14 +48,18 @@ export default function Header() {
         <Link href="/" className="text-gray-600 hover:text-black">Home</Link>
         <Link href="/products" className="text-gray-600 hover:text-black">Products</Link>
 
-
-
         <Link href="/cart" className="text-gray-600 hover:text-black">
           <ShoppingCart />
         </Link>
 
-        <Link href="/signup" className="text-gray-600 hover:text-black">Sign Up</Link>
-        <Link href="/login" className="text-gray-600 hover:text-black">Login</Link>
+        {auth.isAuthenticated ? (
+          <button onClick={handleLogout} className="text-gray-600 hover:text-black">Logout</button>
+        ) : (
+          <>
+            <Link href="/signup" className="text-gray-600 hover:text-black">Sign Up</Link>
+            <Link href="/login" className="text-gray-600 hover:text-black">Login</Link>
+          </>
+        )}
       </nav>
     </header>
   );

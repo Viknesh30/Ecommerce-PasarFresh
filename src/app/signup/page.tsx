@@ -6,6 +6,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import Image from "next/image";
+import { useDispatch } from 'react-redux';
+import { loginStart, loginSuccess, loginFailure, getStoredUsers, saveStoredUsers } from '@/store/authSlice';
+import { v4 as uuidv4 } from 'uuid';
+import { useRouter } from 'next/navigation';
 
 const schema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -24,12 +28,37 @@ export default function SignupPage() {
     resolver: zodResolver(schema),
   });
   const [formError, setFormError] = useState("");
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const onSubmit = async (data: SignupForm) => {
     setFormError("");
-    // TODO: Implement signup logic (API call)
-    // Example: await authAPI.register(data)
-    alert("Signup submitted! (implement logic)");
+    dispatch(loginStart());
+    try {
+      // Check for existing user
+      const users = getStoredUsers();
+      if (users.some(u => u.email === data.email)) {
+        setFormError('Email already registered.');
+        dispatch(loginFailure('Email already registered.'));
+        return;
+      }
+      // Save new user
+      const newUser = {
+        id: uuidv4(),
+        email: data.email,
+        name: data.name,
+        password: data.password,
+        role: 'customer',
+      };
+      users.push(newUser);
+      saveStoredUsers(users);
+      // Log in the user
+      dispatch(loginSuccess({ user: { id: newUser.id, email: newUser.email, name: newUser.name, role: 'customer' }, token: 'mock-token' }));
+      router.push('/');
+    } catch (err) {
+      setFormError('Signup failed.');
+      dispatch(loginFailure('Signup failed.'));
+    }
   };
 
   return (
@@ -123,23 +152,7 @@ export default function SignupPage() {
                 )}
               </div>
 
-              <div className="flex items-start">
-                <input
-                  type="checkbox"
-                  id="terms"
-                  className="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                />
-                <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                  I agree to the{' '}
-                  <Link href="/terms" className="text-green-600 hover:text-green-700 font-medium">
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="text-green-600 hover:text-green-700 font-medium">
-                    Privacy Policy
-                  </Link>
-                </label>
-              </div>
+
 
               {formError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">

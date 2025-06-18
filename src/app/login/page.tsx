@@ -6,6 +6,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import Image from "next/image";
+import { useDispatch } from 'react-redux';
+import { loginStart, loginSuccess, loginFailure, getStoredUsers } from '@/store/authSlice';
+import { useRouter } from 'next/navigation';
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -23,11 +26,26 @@ export default function LoginPage() {
     resolver: zodResolver(schema),
   });
   const [formError, setFormError] = useState("");
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const onSubmit = async (data: LoginForm) => {
     setFormError("");
-    // TODO: Implement login logic (API call)
-    alert("Login submitted! (implement logic)");
+    dispatch(loginStart());
+    try {
+      const users = getStoredUsers();
+      const user = users.find(u => u.email === data.email && u.password === data.password);
+      if (!user) {
+        setFormError('Invalid email or password.');
+        dispatch(loginFailure('Invalid email or password.'));
+        return;
+      }
+      dispatch(loginSuccess({ user: { id: user.id, email: user.email, name: user.name, role: user.role }, token: 'mock-token' }));
+      router.push('/');
+    } catch (err) {
+      setFormError('Login failed.');
+      dispatch(loginFailure('Login failed.'));
+    }
   };
 
   return (
@@ -84,18 +102,7 @@ export default function LoginPage() {
             </div>
             <div className="flex items-center my-4">
               <div className="flex-grow h-px bg-gray-200" />
-              <span className="mx-2 text-gray-400 text-sm">OR</span>
               <div className="flex-grow h-px bg-gray-200" />
-            </div>
-            <div className="flex gap-3 mb-2">
-              <button className="flex-1 flex items-center justify-center border border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition">
-                <Image src="/file.svg" alt="Facebook" width={20} height={20} className="mr-2" />
-                <span className="font-medium text-gray-700">Facebook</span>
-              </button>
-              <button className="flex-1 flex items-center justify-center border border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition">
-                <Image src="/globe.svg" alt="Google" width={20} height={20} className="mr-2" />
-                <span className="font-medium text-gray-700">Google</span>
-              </button>
             </div>
             <p className="mt-4 text-center text-sm text-gray-600">
               New to PasarFresh?{' '}
