@@ -16,8 +16,47 @@ interface AuthState {
   error: string | null
 }
 
+// Helpers for localStorage mock auth
+type StoredUser = User & { password: string };
+const USERS_KEY = 'mock_users';
+const CURRENT_USER_KEY = 'mock_current_user';
+
+export const getStoredUsers = (): StoredUser[] => {
+  if (typeof window !== 'undefined') {
+    try {
+      const users = localStorage.getItem(USERS_KEY);
+      return users ? JSON.parse(users) : [];
+    } catch {}
+  }
+  return [];
+};
+
+export const saveStoredUsers = (users: StoredUser[]) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+};
+
+export const setCurrentUser = (user: User | null) => {
+  if (typeof window !== 'undefined') {
+    if (user) {
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(CURRENT_USER_KEY);
+    }
+  }
+};
+
+export const getCurrentUser = (): User | null => {
+  if (typeof window !== 'undefined') {
+    const user = localStorage.getItem(CURRENT_USER_KEY);
+    return user ? JSON.parse(user) : null;
+  }
+  return null;
+};
+
 const initialState: AuthState = {
-  user: null,
+  user: getCurrentUser(),
   token: null,
   isAuthenticated: false,
   isLoading: false,
@@ -39,6 +78,7 @@ const authSlice = createSlice({
       state.user = action.payload.user
       state.token = action.payload.token
       state.error = null
+      setCurrentUser(action.payload.user);
     },
     
     loginFailure: (state, action: PayloadAction<string>) => {
@@ -54,6 +94,7 @@ const authSlice = createSlice({
       state.token = null
       state.isAuthenticated = false
       state.error = null
+      setCurrentUser(null);
     },
     
     updateUser: (state, action: PayloadAction<Partial<User>>) => {

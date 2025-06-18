@@ -8,7 +8,6 @@ import { ShoppingCart, Star, Filter, Search, Grid, List } from 'lucide-react';
 import { productsAPI } from '@/lib/api';
 import { Product, ProductFilters } from '@/types';
 
-// Sample categories for now
 const categories = [
   { id: 'meat', name: 'Meat', slug: 'meat' },
   { id: 'dairy', name: 'Dairy', slug: 'dairy' },
@@ -16,7 +15,6 @@ const categories = [
   { id: 'fish', name: 'Fish', slug: 'fish' },
 ];
 
-// Sample products for now (replace with API call later)
 const sampleProducts: Product[] = [
   {
     id: '1',
@@ -134,31 +132,26 @@ export default function ProductPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   
-  // Filter states
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [sortBy, setSortBy] = useState(searchParams.get('sortBy') || 'newest');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Load products from API (commented out for now since we're using sample data)
+  const PRODUCTS_PER_PAGE = 4;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
+
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        // Uncomment when API is ready:
-        // const response = await productsAPI.getAll({
-        //   search: searchQuery,
-        //   category: selectedCategory,
-        //   minPrice: priceRange.min ? Number(priceRange.min) : undefined,
-        //   maxPrice: priceRange.max ? Number(priceRange.max) : undefined,
-        //   sortBy: sortBy as any,
-        //   sortOrder,
-        // });
-        // setProducts(response.data.data);
-        
-        // For now, use sample data
-        setProducts(sampleProducts);
+
+                setProducts(sampleProducts);
       } catch (error) {
         console.error('Error loading products:', error);
       } finally {
@@ -169,7 +162,6 @@ export default function ProductPage() {
     loadProducts();
   }, [searchQuery, selectedCategory, priceRange, sortBy, sortOrder]);
 
-  // Filter products based on current filters
   useEffect(() => {
     let filtered = [...products];
 
@@ -228,8 +220,11 @@ export default function ProductPage() {
     setFilteredProducts(filtered);
   }, [products, searchQuery, selectedCategory, priceRange, sortBy, sortOrder]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, priceRange, sortBy, sortOrder]);
+
   const handleAddToCart = (productId: string) => {
-    // TODO: Implement add to cart functionality
     console.log('Adding to cart:', productId);
   };
 
@@ -346,7 +341,6 @@ export default function ProductPage() {
             </button>
           </div>
 
-          {/* Price Range Filter */}
           <div className="flex items-center gap-2">
             <input
               type="number"
@@ -367,12 +361,10 @@ export default function ProductPage() {
         </div>
       </div>
 
-      {/* Results Count */}
       <div className="mb-4 text-sm text-gray-600">
         Showing {filteredProducts.length} of {products.length} products
       </div>
 
-      {/* Products Grid/List */}
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
@@ -387,14 +379,13 @@ export default function ProductPage() {
           ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
           : 'space-y-4'
         }>
-          {filteredProducts.map((product) => (
+          {paginatedProducts.map((product) => (
             <div
               key={product.id}
               className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow ${
                 viewMode === 'list' ? 'flex' : ''
               }`}
             >
-              {/* Product Image */}
               <div className={`relative ${viewMode === 'list' ? 'w-48 h-48' : 'h-48'}`}>
                 <Image
                   src={product.images[0] || '/placeholder.jpg'}
@@ -404,12 +395,10 @@ export default function ProductPage() {
                 />
               </div>
 
-              {/* Product Info */}
               <div className={`p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
                 <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
                 
-                {/* Rating */}
                 <div className="flex items-center gap-1 mb-3">
                   {renderStars(product.rating)}
                   <span className="text-sm text-gray-600 ml-1">
@@ -417,7 +406,6 @@ export default function ProductPage() {
                   </span>
                 </div>
 
-                {/* Price and Stock */}
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xl font-bold text-green-600">
                     RM {product.price.toFixed(2)}
@@ -431,7 +419,6 @@ export default function ProductPage() {
                   </span>
                 </div>
 
-                {/* Add to Cart Button */}
                 <button
                   onClick={() => handleAddToCart(product.id)}
                   disabled={product.stock === 0}
@@ -443,6 +430,34 @@ export default function ProductPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8 gap-2">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded border border-gray-300 bg-white disabled:opacity-50"
+          >
+            Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 rounded border border-gray-300 ${currentPage === i + 1 ? 'bg-green-500 text-white' : 'bg-white'}`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 rounded border border-gray-300 bg-white disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
