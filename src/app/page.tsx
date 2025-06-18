@@ -7,14 +7,75 @@ import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import { ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const schema = z.object({
   search: z.string().min(1, 'Search cannot be empty'),
 });
 
+const products = [
+  {
+    id: 1,
+    name: "Fresh Chicken",
+    description: "Locally sourced, hormone-free chicken.",
+    price: 16.00,
+    image: "/chicken.png"
+  },
+  {
+    id: 2,
+    name: "Organic Eggs",
+    description: "Farm fresh organic eggs.",
+    price: 6.50,
+    image: "/eggs.jpg"
+  },
+  {
+    id: 3,
+    name: "Fresh Fish",
+    description: "Fresh fish from the sea.",
+    price: 15.00,
+    image: "/fish.jpg"
+  },
+  {
+    id: 4,
+    name: "Fresh Goat Meat",
+    description: "Fresh goat meat from the farm.",
+    price: 20.00,
+    image: "/goat.png"
+  },
+  {
+    id: 5,
+    name: "Fresh Duck Meat",
+    description: "Fresh duck meat from the farm.",
+    price: 25.00,
+    image: "/duck.jpg"
+  },
+  {
+    id: 6,
+    name: "Fresh Goat Milk",
+    description: "Fresh goat milk from the farm.",
+    price: 10.00,
+    image: "/goatmilk.jpg"
+  },
+  {
+    id: 7,
+    name: "Fresh Cow Milk",
+    description: "Fresh cow milk from the farm.",
+    price: 10.00,
+    image: "/cowmilk.jpg"
+  },
+  { 
+    id: 8,
+    name: "Fresh Cow Meat",
+    description: "Fresh cow meat from the farm.",
+    price: 20.00,
+    image: "/beef.jpg"
+  },
+  
+];
+
 export default function Home() {
+  const router = useRouter();
   const dispatch = useDispatch(); // ready for future use
   const {
     register,
@@ -25,16 +86,10 @@ export default function Home() {
   });
 
   const onSubmit = (data: { search: string }) => {
-    console.log('Search:', data.search);
-    // Future: dispatch search action or call API
+    if (data.search.trim()) {
+      router.push(`/products?search=${encodeURIComponent(data.search)}`);
+    }
   };
-
-  useEffect(() => {
-    // Example API call
-    axios.get('/api/featured-products').then((res) => {
-      console.log('Featured products:', res.data);
-    });
-  }, []);
 
   return (
     <main className="max-w-7xl mx-auto p-6">
@@ -56,27 +111,37 @@ export default function Home() {
         </Link>
       </section>
 
+      {/* Search Bar */}
+      <form onSubmit={handleSubmit(onSubmit)} className="mb-8 max-w-xl mx-auto">
+        <input
+          {...register('search')}
+          type="text"
+          placeholder="Search products..."
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+        />
+        {errors.search && (
+          <p className="text-red-500 text-sm mt-1">{errors.search.message as string}</p>
+        )}
+      </form>
 
       {/* Product Grid */}
       <section>
         <h2 className="text-2xl font-semibold mb-6">Featured Products</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {[1, 2, 3, 4, 5, 6].map((id) => (
-            <div key={id} className="border rounded-lg overflow-hidden shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          {products.map((product) => (
+            <div key={product.id} className="border rounded-lg overflow-hidden shadow-sm flex flex-col h-[460px] w-[280px] mx-auto">
               <Image
-                src="/placeholder-product.png"
-                alt={`Product ${id}`}
+                src={product.image}
+                alt={product.name}
                 width={400}
-                height={300}
-                className="object-cover"
+                height={200}
+                className="object-cover w-full h-[200px]"
               />
-              <div className="p-4">
-                <h3 className="font-medium text-lg mb-2">Product {id}</h3>
-                <p className="text-sm text-gray-600 mb-3">
-                  Short product description.
-                </p>
-                <span className="text-xl font-bold block mb-3">$19.99</span>
-                <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+              <div className="p-4 flex flex-col flex-grow">
+                <h3 className="font-medium text-lg mb-2">{product.name}</h3>
+                <p className="text-sm text-gray-600 mb-3 flex-grow">{product.description}</p>
+                <span className="text-xl font-bold block mb-3">RM{product.price.toFixed(2)}</span>
+                <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 mt-auto">
                   Add to Cart
                 </button>
               </div>
