@@ -98,6 +98,34 @@ Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
 ![image](https://github.com/user-attachments/assets/f2241813-3ae4-4854-ab11-525c040f0183)
 
+-- Screenshot of the Homepage
+
+![image](https://github.com/user-attachments/assets/634820cb-dedf-4ec7-994d-771bca06d9f0)
+
+![image](https://github.com/user-attachments/assets/bba39834-67f9-4c02-b4a2-220e397f2373)
+
+![image](https://github.com/user-attachments/assets/5f3e2d67-0746-4c8f-a7fe-1deb9156313e)
+
+![image](https://github.com/user-attachments/assets/8f575a98-f2fb-4691-bc49-2e7cec812590)
+
+-- Screenshot of the Product Page with Pagination,Search And Filtering
+
+
+![image](https://github.com/user-attachments/assets/4733e726-8b84-44ec-bccc-5f3b981c0fb0)
+
+-- Screenshot of the Sign Up Page
+
+![image](https://github.com/user-attachments/assets/c5c4395f-47a4-434c-ba71-9c3f76edbf9e)
+
+-- Screenshot of the Login Page
+
+
+
+-- Screenshot of the Product Page with Pagination
+
+ 
+
+
 
 
 
