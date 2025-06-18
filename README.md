@@ -108,7 +108,6 @@ Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## ⚙️ Configuration
 
-- *API Base URL*: Set NEXT_PUBLIC_API_URL in your environment to point to your backend API (default: http://localhost:5000/api).
 - *Product Images*: Place product images in the /public folder.
 
 ## 📝 Customization
