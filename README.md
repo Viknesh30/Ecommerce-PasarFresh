@@ -92,3 +92,15 @@ Visit [http://localhost:3000](http://localhost:3000) in your browser.
 - [React Hook Form](https://react-hook-form.com/)
 - [Zod](https://zod.dev/)
 - [Redux Toolkit](https://redux-toolkit.js.org/)
+- 
+
+## Screenshots of the Project
+
+![image](https://github.com/user-attachments/assets/f2241813-3ae4-4854-ab11-525c040f0183)
+
+
+
+
+
+
+
